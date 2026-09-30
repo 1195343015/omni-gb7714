@@ -135,6 +135,8 @@
   show-patent-country: false,
   /// 多卷书卷号与分卷名之间的间距 gutter：auto（普通词间空格，对齐官方 CSL）/ 长度（如 1em = 李泽平 \quad 宽间距）
   volume-title-gutter: auto,
+  /// 日期区间（EDTF interval，如 `date = {1996-01-01/2026-05-17}`）起讫连接符：auto（默认破折号 `—`）/ 任意字符串（如 `"/"` 取 ISO 8601 区间式）
+  date-range-separator: auto,
   /// 缺出版地时补 [S.l.] / 出版地不详 占位（sine loco）。默认 auto=条件补白（出版者在场才补）；true=一缺就补（GB 严格著录）；false=留空
   show-sine-loco:      auto,
   /// 缺出版者时补 [s.n.] / 出版者不详 占位（sine nomine）。默认 auto=条件补白（出版地在场才补）；true=一缺就补（GB 严格著录）；false=留空
@@ -290,7 +292,7 @@
     back-ref: back-ref,
     disambiguate: disambiguate, bib-sort-by: bib-sort-by, cite-sort-by: cite-sort-by, sort-keys: sort-keys, bib-sort-zh-by: bib-sort-zh-by, cite-sort-zh-by: cite-sort-zh-by, cite-collapse-date: cite-collapse-date, sort-use-prefix: sort-use-prefix, entry-lang-order: entry-lang-order, entry-lang-detect: entry-lang-detect,
     show-mark: show-mark, show-medium: show-medium, show-url: show-url, show-urldate: show-urldate,
-    show-related: show-related, show-patent-country: show-patent-country, volume-title-gutter: volume-title-gutter,
+    show-related: show-related, show-patent-country: show-patent-country, volume-title-gutter: volume-title-gutter, date-range-separator: date-range-separator,
     show-sine-loco: show-sine-loco, show-sine-nomine: show-sine-nomine, show-sine-anno: show-sine-anno, show-degree: show-degree, show-series: show-series, prefix-last: prefix-last, show-annotation: show-annotation,
     short-journal: short-journal, hyperlink: hyperlink, hyperlink-title: hyperlink-title,
     show-pid: show-pid, pid-priority: pid-priority, dedup-url-pid: dedup-url-pid,
