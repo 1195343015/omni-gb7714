@@ -314,7 +314,7 @@
   text = text.replace(_ST, "~")
 
   text = text.replace("``", "\u{201C}").replace("''", "\u{201D}")
-  text = text.replace("`", "\u{2018}").replace("'", "\u{2019}")
+  text = text.replace("`", "\u{2018}")
 
   let bare = _bare-special(text)
   let scanned = _command-scan(text)
