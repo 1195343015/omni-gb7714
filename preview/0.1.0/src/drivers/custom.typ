@@ -211,12 +211,33 @@
 
 #let _collapse-around-empty(left, right, next-char) = {
   if next-char == "/" { return () }
-  for run in (left, right) {
+  // 折叠空组周围的 separators 时只保留一个结构句点，
+  // 但 verbatim 字面量（text 类 hard 项）及其紧邻的前导软空格必须存活
+  let collect(run) = {
+    let literals = ()
+    let period = none
+    let pending-soft = none
     for item in run {
-      if item.at(0) == "hard" and item.len() > 2 and item.at(2) { return (item,) }
+      if item.at(0) == "soft" { pending-soft = item; continue }
+      if item.at(0) == "hard" and item.len() > 2 {
+        if item.at(2) {
+          if period == none { period = item }
+          pending-soft = none
+        } else if item.len() > 3 and item.at(3) == "text" {
+          if pending-soft != none { literals.push(pending-soft); pending-soft = none }
+          literals.push(item)
+        } else {
+          pending-soft = none
+        }
+      }
     }
+    (literals, period)
   }
-  right
+  let left-col = collect(left)
+  let right-col = collect(right)
+  let period-item = if left-col.at(1) != none { left-col.at(1) } else { right-col.at(1) }
+  if period-item != none { return left-col.at(0) + right-col.at(0) + (period-item,) }
+  left-col.at(0) + right
 }
 
 #let _drop-trailing-period(items) = {
@@ -258,7 +279,7 @@
     let p = parts.at(i)
     if next-kind == "punct" or next-kind == "text" {
       let is-period = next-kind == "punct" and punct.char-to-slot.at(cur-node.at(1), default: none) == "period"
-      buffer.push(("hard", p, is-period))
+      buffer.push(("hard", p, is-period, next-kind))
       continue
     }
     if not seen-data {
@@ -296,8 +317,10 @@
     pending-empty = false
   }
 
-  if keep-trailing and emitted and buffer.len() > 0 {
-    result += _resolve-separator(buffer, last-character, none)
+  if keep-trailing and emitted and (buffer.len() > 0 or (pending-empty and held.len() > 0)) {
+    // 末尾仍有被空组挂起的 held 缓冲时一并折叠输出，避免 verbatim 字面量丢失
+    let tail-sep = if pending-empty { _collapse-around-empty(held, buffer, none) } else { buffer }
+    result += _resolve-separator(tail-sep, last-character, none)
   }
   if not emitted {
 
