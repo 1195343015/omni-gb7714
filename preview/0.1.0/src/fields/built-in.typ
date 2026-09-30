@@ -147,7 +147,8 @@
   }
   if name == "date" {
     if opts.skip-date { return none }
-    return publication-date.date(entry)
+    let drs = opts.at("date-range-separator", default: auto)
+    return publication-date.date(entry, range-separator: if drs == auto or drs == none { "—" } else { drs })
   }
   if name == "urldate" { return date.urldate(entry, show-urldate: opts.show-urldate, version: opts.version) }
   if name == "address" or name == "location" { return imprint.location(entry) }
