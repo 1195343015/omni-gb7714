@@ -209,10 +209,22 @@
   out
 }
 
+#let _has-text-literal(run) = {
+  run.any(it => it.at(0) == "hard" and it.len() > 3 and it.at(3) == "text")
+}
+
 #let _collapse-around-empty(left, right, next-char) = {
   if next-char == "/" { return () }
-  // 折叠空组周围的 separators 时只保留一个结构句点，
-  // 但 verbatim 字面量（text 类 hard 项）及其紧邻的前导软空格必须存活
+  // 无 verbatim 字面量时保持原始折叠语义（内置 driver 路径逐字不变）
+  if not (_has-text-literal(left) or _has-text-literal(right)) {
+    for run in (left, right) {
+      for item in run {
+        if item.at(0) == "hard" and item.len() > 2 and item.at(2) { return (item,) }
+      }
+    }
+    return right
+  }
+  // 有 verbatim 字面量时：折叠结构句点，但保留字面量及其前导软空格
   let collect(run) = {
     let literals = ()
     let period = none
@@ -317,9 +329,11 @@
     pending-empty = false
   }
 
-  if keep-trailing and emitted and (buffer.len() > 0 or (pending-empty and held.len() > 0)) {
-    // 末尾仍有被空组挂起的 held 缓冲时一并折叠输出，避免 verbatim 字面量丢失
-    let tail-sep = if pending-empty { _collapse-around-empty(held, buffer, none) } else { buffer }
+  // 末尾被空组挂起的 held 仅当含 verbatim 字面量时才参与 flush，
+  // 否则保持原始行为（内置 driver 路径逐字不变）
+  let held-has-text = _has-text-literal(held)
+  if keep-trailing and emitted and (buffer.len() > 0 or (pending-empty and held-has-text)) {
+    let tail-sep = if pending-empty and held-has-text { _collapse-around-empty(held, buffer, none) } else { buffer }
     result += _resolve-separator(tail-sep, last-character, none)
   }
   if not emitted {
